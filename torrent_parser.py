@@ -1,3 +1,5 @@
+from hashlib import sha1
+
 import bencode as be
 
 def parse_torrent_file(filename: str):
@@ -9,7 +11,7 @@ def parse_torrent_file(filename: str):
     # Convert all keys to utf-8 strings
     torrent = decode_dict_utf8(d)
 
-    return torrent
+    return torrent, get_infohash(data)
 
 
 def decode_dict_utf8(d: dict) -> dict:
@@ -54,8 +56,19 @@ def parse_pieces(b: bytes) -> list:
     return l
 
 
+def get_infohash(bencoding: bytes) -> bytes:
+    '''Finds the info dictionary in the bencoding and returns its sha1 hash'''
+    infodict_start = bencoding.index(b'info') + len(b'info')
+    _, infodict_stop = be._decode_dict(bencoding, infodict_start)
+    bencoded_infodict = bencoding[infodict_start:infodict_stop]
+    m = sha1()
+    m.update(bencoded_infodict)
+    infohash = m.digest()
+    return infohash
+
+
 if __name__ == "__main__":
-    r = parse_torrent_file('torrent-file-examples/wired-cd.torrent')
+    r, infohash = parse_torrent_file('torrent-file-examples/wired-cd.torrent')
     import json
     with open('output.json', 'w') as f:
         f.write(json.dumps(r, indent=4, default=str))
