@@ -55,7 +55,7 @@ def parse_pieces(b: bytes) -> list:
 
 
 if __name__ == "__main__":
-    r = parse_torrent_file('torrent-file-examples/big-buck-bunny.torrent')
+    r = parse_torrent_file('torrent-file-examples/wired-cd.torrent')
     import json
     with open('output.json', 'w') as f:
         f.write(json.dumps(r, indent=4, default=str))
